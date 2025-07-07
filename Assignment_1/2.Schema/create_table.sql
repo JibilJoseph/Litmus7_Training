@@ -44,3 +44,5 @@ create table batch_assignments(batch_id int,a_id int,
 create table scores(candidate_id int,sub_date date,score int,
 	foreign key(candidate_id) references candidate(candidate_id)
 );
+
+alter table scores rename to assignment_submission;
