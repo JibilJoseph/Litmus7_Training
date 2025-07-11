@@ -3,27 +3,81 @@
 
 -- 1. Get all batches a candidate is enrolled in, with their status. 
 
-select candidate.candidate_id,candidate_name,state from candidate join batch_joined on candidate.candidate_id=batch_joined.candidate_id;
+SELECT 
+    u.user_id,
+    u.name AS candidate_name,
+    b.batch_id,
+    b.batch_name,
+    b.batch_code,
+    ub.status,
+    ub.enrolled_date
+FROM Users u
+JOIN users_Batches ub ON u.user_id = ub.user_id
+JOIN Batches b ON ub.batch_id = b.batch_id; 
 
 -- 2. Get all trainers assigned to a batch. 
 
-select t.trainer_id,t.trainer_name,t2.batch_id from trainers t join teaching t2 on t.trainer_id=t2.trainer_id;
+SELECT DISTINCT
+    b.batch_id,
+    b.batch_name,
+    u.user_id AS trainer_id,
+    u.name AS trainer_name,
+    u.user_name AS trainer_username
+FROM Batches b
+JOIN Sessions s ON b.batch_id = s.batch_id
+JOIN Users u ON s.trainer_id = u.user_id order by b.batch_id;
 
 -- 3.Get all topics under a course. 
 
-select t.topic_id,t.topic_name,c.course_id from topics t join covered_topics c where t.topic_id=c.topic_id order by course_id;
+SELECT 
+    c.course_id,
+    c.course_name,
+    t.topic_id,
+    t.topic_name
+FROM Courses c
+JOIN Topics t ON c.course_id = t.course_id
+ORDER BY c.course_id;
 
 -- 4.List assignment scores for a candidate in a batch. 
 
-select * from scores where candidate_id in (select c.candidate_id from candidate c join batch_joined b on c.candidate_id=b.candidate_id where b.batch_id=1);
+SELECT 
+    u.user_id,
+    u.name AS candidate_name,
+    b.batch_id,
+    b.batch_name,
+    a.assignment_id,
+    a.title AS assignment_title,
+    ua.score,
+    ua.total_score,
+    ua.attempt_no,
+    ua.max_attempts,
+    ua.review,
+    t.topic_name
+FROM Users u
+JOIN users_Batches ub ON u.user_id = ub.user_id
+JOIN Batches b ON ub.batch_id = b.batch_id
+JOIN Batches_Assignments ba ON b.batch_id = ba.batch_id
+JOIN Assignments a ON ba.assignment_id = a.assignment_id
+JOIN users_assignments ua ON u.user_id = ua.user_id AND a.assignment_id = ua.assignment_id
+JOIN Topics t ON a.topic_id = t.topic_id
+WHERE u.user_id = 1 AND b.batch_id = 1  
+ORDER BY a.assignment_id, ua.attempt_no;
 
-select t1.candidate_id,b.batch_id,t1.candidate_name,t1.score from
-(select candidate.candidate_id,candidate.candidate_name,scores.score from scores join candidate on scores.candidate_id=candidate.candidate_id) as t1
-join batch_joined b on t1.candidate_id=b.candidate_id;
 
+-- 5. List candidates with status "Completed" in a given batch. 
 
--- List candidates with status "Completed" in a given batch. 
-
-select * from candidate where candidate_id in (
-select candidate_id from batch_joined where state="completed"
-);
+SELECT 
+    u.user_id,
+    u.name AS candidate_name,
+    u.user_name,
+    u.phone,
+    ub.status,
+    ub.enrolled_date,
+    b.batch_id,
+    b.batch_name,
+    b.batch_code
+FROM Users u
+JOIN users_Batches ub ON u.user_id = ub.user_id
+JOIN Batches b ON ub.batch_id = b.batch_id
+WHERE ub.status = 'completed' 
+ORDER BY b.batch_id;
