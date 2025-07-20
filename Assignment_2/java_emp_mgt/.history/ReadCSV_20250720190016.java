@@ -5,10 +5,10 @@ import java.sql.*;
 
 public class ReadCSV {
     public static void main(String[] args) {
-        String filePath = "employees.csv";
-        String jdbcURL = Secret.JDBC_URL;
-        String username = Secret.DB_USER;
-        String password = Secret.DB_PASSWORD;
+        String filePath = "employees.csv"; 
+        String jdbcURL = "jdbc:mysql://localhost:3306/java"; 
+        String username = "root"; 
+        String password = "root"; 
 
         try (
             BufferedReader br = new BufferedReader(new FileReader(filePath));
@@ -24,6 +24,15 @@ public class ReadCSV {
 
             PreparedStatement insertStmt = connection.prepareStatement(insertSQL);
             PreparedStatement checkStmt = connection.prepareStatement(checkSQL);
+
+            Statement stmt = connection.createStatement();
+            try {
+                stmt.executeUpdate("TRUNCATE TABLE Employee");
+                System.out.println("Table Employee truncated.");
+            } catch (SQLException e) {
+                System.out.println("Table Employee does not exist.");
+            }
+            stmt.close();
 
             while ((line = br.readLine()) != null) {
                 String[] values = line.split(",");

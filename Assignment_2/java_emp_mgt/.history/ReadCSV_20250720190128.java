@@ -25,6 +25,15 @@ public class ReadCSV {
             PreparedStatement insertStmt = connection.prepareStatement(insertSQL);
             PreparedStatement checkStmt = connection.prepareStatement(checkSQL);
 
+            Statement stmt = connection.createStatement();
+            try {
+                stmt.executeUpdate("TRUNCATE TABLE Employee");
+                System.out.println("Table Employee truncated.");
+            } catch (SQLException e) {
+                System.out.println("Table Employee does not exist.");
+            }
+            stmt.close();
+
             while ((line = br.readLine()) != null) {
                 String[] values = line.split(",");
 
