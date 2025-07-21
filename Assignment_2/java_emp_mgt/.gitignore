@@ -1,0 +1,20 @@
+# Ignore compiled class files
+*.class
+
+# Ignore the .history folder
+.history/
+
+# Ignore backup and temporary files
+*.log
+*.tmp
+*~
+
+# Ignore IDE-specific files (optional, good practice)
+.vscode/
+.idea/
+*.iml
+
+# Ignore build directories (if using build tools)
+bin/
+target/
+out/
