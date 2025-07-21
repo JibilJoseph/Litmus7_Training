@@ -47,9 +47,12 @@ public class EmployeeManagerController {
         return data; 
     }
 
+    //writing function 
+
     public void writeDataToDB()
     {
         List<String[]> employeeData=readCSV();
+        
         try(Connection connection=DriverManager.getConnection(url,username,password)) {
             String insertSQL = "INSERT INTO Employee (emp_id, first_name, last_name, email, phone, department, salary, join_date) " +
                                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
