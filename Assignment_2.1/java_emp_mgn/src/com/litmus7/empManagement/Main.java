@@ -8,7 +8,7 @@ public class Main {
 		// TODO Auto-generated method stub
 		
 		String filepath="employees.csv";
-		EmployeeManagerController controller=new EmployeeManagerController(filepath);
+		EmployeeManagerController controller=new EmployeeManagerController();
 		
 		List<Response> responses = controller.writeDataToDB(filepath);
 		for (Response response : responses) {

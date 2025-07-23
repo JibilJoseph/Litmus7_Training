@@ -14,23 +14,15 @@ import java.util.List;
 
 public class EmployeeManagerController {
 	
-	//instance variable
-	String filepath;
-
-    
-
-    // Constructor
-    public EmployeeManagerController(String filepath)
-    {
-    	this.filepath=filepath;
-    	
-    }
+	
+   
 
     //reading function
 
-    public List<String[]> loadData()
+    public List<String[]> loadData(String filepath)
     {
         List<String[]> data=new ArrayList<>();
+        
         try(BufferedReader br=new BufferedReader(new FileReader(filepath)))
         {
             String line;
@@ -59,22 +51,35 @@ public class EmployeeManagerController {
 
     public List<Response> writeDataToDB(String path)
     {
-        filepath=path;
+    	//setting connection
+        String filepath=path;
         final String url="jdbc:mysql://localhost:3306/java";
         final String username="root";
         final String password="root";
-        List<String[]> employeeData=loadData();
+        
+        //calling loadData()
+        List<String[]> employeeData=loadData(filepath);
+        
+        
         List<Response> responses = new ArrayList<>();
+        
         try(Connection connection=DriverManager.getConnection(url,username,password)) {
+        	
+        	//Creating Queries
             String insertSQL = "INSERT INTO Employee (emp_id, first_name, last_name, email, phone, department, salary, join_date) " +
                                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             String checkSQL = "SELECT emp_id FROM Employee WHERE emp_id = ?";
+            
+            //Preparing Queries
             PreparedStatement insertstmt=connection.prepareStatement(insertSQL);
             PreparedStatement checkstmt=connection.prepareStatement(checkSQL);
+            
+            //iterate through each row
             for(String[] values:employeeData)
             {
                 // Validate each field
                 Response empidResp = Validator.validateEmpid(values[0]);
+                
                 if(empidResp.getCode() == 2) { responses.add(empidResp); continue; }
                 int empid = empidResp.getIntValue();
 
@@ -114,6 +119,9 @@ public class EmployeeManagerController {
                         responses.add(new Response(2, "Duplicate emp_id: " + empid));
                         continue;
                     }
+                    
+                    // Setting the Queries
+                    
                     insertstmt.setInt(1, empid);
                     insertstmt.setString(2, first_name);
                     insertstmt.setString(3 , last_name);
