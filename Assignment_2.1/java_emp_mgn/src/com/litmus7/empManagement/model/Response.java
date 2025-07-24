@@ -1,7 +1,7 @@
-package com.litmus7.empManagement;
+package com.litmus7.empManagement.model;
 
 public class Response {
-    private int code; // 1 = int, 2 = string
+    private int code; // 1 = success, 2 = error
     private int intValue;
     private String stringValue;
 
@@ -19,17 +19,9 @@ public class Response {
         this.intValue = 0;
     }
 
-    public int getCode() {
-        return code;
-    }
-
-    public int getIntValue() {
-        return intValue;
-    }
-
-    public String getStringValue() {
-        return stringValue;
-    }
+    public int getCode() { return code; }
+    public int getIntValue() { return intValue; }
+    public String getStringValue() { return stringValue; }
 
     @Override
     public String toString() {
