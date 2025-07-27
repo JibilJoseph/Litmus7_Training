@@ -15,7 +15,15 @@ public class Main {
         List<Response> responses = controller.importEmployeesFromCSV(filepath);
         
         
-        // display responses to the user
         controller.displayResponses(responses);
+        
+        
+        // delete function
+        //Response responses1 =controller.deleteEmployee(101);
+        
+        
+        // display responses to the user
+        
+        //System.out.println(responses1);
     }
 }
