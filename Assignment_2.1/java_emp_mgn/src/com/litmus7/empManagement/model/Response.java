@@ -1,36 +1,67 @@
 package com.litmus7.empManagement.model;
 
-public class Response {
-    private int code; // 1 = success, 2 = error
-    private int intValue;
-    private String stringValue;
-
-    // Constructor for integer response
-    public Response(int code, int intValue) {
-        this.code = code;
-        this.intValue = intValue;
-        this.stringValue = null;
+public class Response<T>
+{
+	private int statusCode;
+	private String message;
+	private T data;
+	
+	// default constructor
+	public Response()
+	{
+		
+	}
+	
+	// constructor with status and msg
+	
+	public Response(int statusCode,String message)
+	{
+		this.statusCode=statusCode;
+		this.message=message;
+		
+	}
+	
+	//constructor with all
+	
+	public Response(int statusCode,String message,T data)
+	{
+		this.statusCode=statusCode;
+		this.message=message;
+		this.data=data;
+	}
+	
+	// getters and setter : for statusCode
+	
+	public int getStatusCode()
+	{
+		return statusCode;
+	}
+	
+	public void setStatusCode(int statusCode)
+	{
+		this.statusCode=statusCode;
+	}
+	
+	// getters and setter : for message
+	
+	public String getMessage()
+	{
+		return message;
+	}
+	
+	public void setMessage(String message)
+	{
+		this.message=message;
+	}
+	
+	// getters and setter : for data
+	
+	public T getData() {
+        return data;
     }
 
-    // Constructor for string response
-    public Response(int code, String stringValue) {
-        this.code = code;
-        this.stringValue = stringValue;
-        this.intValue = 0;
+    public void setData(T data) {
+        this.data = data;
     }
-
-    public int getCode() { return code; }
-    public int getIntValue() { return intValue; }
-    public String getStringValue() { return stringValue; }
-
-    @Override
-    public String toString() {
-        if (code == 1) {
-            return "Response{code=" + code + ", intValue=" + intValue + '}';
-        } else if (code == 2) {
-            return "Response{code=" + code + ", stringValue='" + stringValue + "'}";
-        } else {
-            return "Response{code=" + code + ", value=undefined}";
-        }
-    }
+	
 }

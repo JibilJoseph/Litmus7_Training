@@ -1,71 +1,46 @@
 package com.litmus7.empManagement.utils;
 
-import com.litmus7.empManagement.model.Response;
-import java.sql.Date;
+import com.litmus7.empManagement.model.Employee;
+
 import java.util.regex.Pattern;
 
 public class Validator {
-    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
-    private static final Pattern PHONE_PATTERN = Pattern.compile("^[0-9]{10,15}$");
+	private static final Pattern EMAIL_PATTERN = Pattern.compile("^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,}$");
+    private static final Pattern PHONE_PATTERN = Pattern.compile("^\\d{10}$");
+    private static final Pattern NAME_PATTERN = Pattern.compile("^[A-Za-z]{1,50}$");
+    private static final Pattern DEPARTMENT_PATTERN = Pattern.compile("^[A-Za-z ]{1,50}$");
+    private static final Pattern SALARY_PATTERN = Pattern.compile("^\\d+(\\.\\d{1,2})?$");
+    private static final Pattern JOIN_DATE_PATTERN = Pattern.compile("^\\d{4}-\\d{2}-\\d{2}$");
 
-    public static Response validateEmpid(String value) {
-        try {
-            int empid = Integer.parseInt(value.trim());
-            if (empid <= 0) return new Response(2, "Invalid empid");
-            return new Response(1, empid);
-        } catch (NumberFormatException e) {
-            return new Response(2, "empid must be an integer");
-        }
+    public static boolean isValidEmail(String email) {
+        return EMAIL_PATTERN.matcher(email).matches();
     }
 
-    public static Response validateFirstName(String value) {
-        String firstName = value.trim();
-        if (firstName.isEmpty()) return new Response(2, "First name is empty");
-        return new Response(1, 0);
+    public static boolean isValidPhone(String phone) {
+        return PHONE_PATTERN.matcher(phone).matches();
     }
 
-    public static Response validateLastName(String value) {
-        String lastName = value.trim();
-        if (lastName.isEmpty()) return new Response(2, "Last name is empty");
-        return new Response(1, 0);
+    public static boolean isValidName(String name) {
+        return NAME_PATTERN.matcher(name).matches();
     }
 
-    public static Response validateEmail(String value) {
-        String email = value.trim();
-        if (!EMAIL_PATTERN.matcher(email).matches()) 
-            return new Response(2, "Invalid email format");
-        return new Response(1, 0);
+    public static boolean isValidDepartment(String department) {
+        return DEPARTMENT_PATTERN.matcher(department).matches();
     }
 
-    public static Response validatePhone(String value) {
-        String phone = value.trim();
-        if (!PHONE_PATTERN.matcher(phone).matches()) 
-            return new Response(2, "Invalid phone number");
-        return new Response(1, 0);
+    public static boolean isValidSalary(String salary) {
+        return SALARY_PATTERN.matcher(salary).matches();
     }
-
-    public static Response validateDepartment(String value) {
-        String department = value.trim();
-        if (department.isEmpty()) return new Response(2, "Department is empty");
-        return new Response(1, 0);
+    public static boolean isValidJoinDate(String date) {
+        return JOIN_DATE_PATTERN.matcher(date).matches();
     }
-
-    public static Response validateSalary(String value) {
-        try {
-            double salary = Double.parseDouble(value.trim());
-            if (salary <= 0) return new Response(2, "Salary must be positive");
-            return new Response(1, (int)salary);
-        } catch (NumberFormatException e) {
-            return new Response(2, "Salary must be a number");
-        }
-    }
-
-    public static Response validateJoinDate(String value) {
-        try {
-            Date joinDate = Date.valueOf(value.trim());
-            return new Response(1, 0);
-        } catch (IllegalArgumentException e) {
-            return new Response(2, "Invalid join date format (expected yyyy-[m]m-[d]d)");
-        }
+    public static boolean validateEmployee(Employee employee) {
+        return isValidName(employee.getFirstName()) &&
+               isValidName(employee.getLastName()) &&
+               isValidEmail(employee.getEmail()) &&
+               isValidPhone(employee.getPhone()) &&
+               isValidDepartment(employee.getDepartment()) &&
+               isValidSalary(String.valueOf(employee.getSalary())) &&
+               isValidJoinDate(employee.getJoinDate().toString());
     }
 }

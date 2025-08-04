@@ -5,56 +5,65 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 public class CSVReader {
-    
-    // Store errors at class level
+
     private static List<Response> errors = new ArrayList<>();
-    
+    private static final Logger logger = AppLogger.getLogger();
+
     public static List<String[]> readCSV(String filepath) {
         List<String[]> data = new ArrayList<>();
-        errors.clear(); // Clear previous errors
-        
+        errors.clear();
+
+        logger.info("Starting CSV file read operation for file: " + filepath);
+
         try (BufferedReader br = new BufferedReader(new FileReader(filepath))) {
             String line;
             int lineNumber = 0;
-            
-            // Skip header line
+
+            // Skip header
             br.readLine();
             lineNumber++;
-            
+
             while ((line = br.readLine()) != null) {
                 lineNumber++;
-                
+
                 if (line.trim().isEmpty()) {
-                    errors.add(new Response(2, "Empty line at line " + lineNumber));
+                    String errorMsg = "Empty line at line " + lineNumber;
+                    logger.warning(errorMsg);
+                    errors.add(new Response<>(2, errorMsg));
                     continue;
                 }
-                
+
                 String[] values = line.split(",");
-                
+
                 if (values.length != 8) {
-                    errors.add(new Response(2, "Incomplete row at line " + lineNumber + ": expected 8 columns, got " + values.length));
+                    String errorMsg = "Incomplete row at line " + lineNumber + ": expected 8 columns, got " + values.length;
+                    logger.warning(errorMsg);
+                    errors.add(new Response<>(2, errorMsg));
                     continue;
                 }
-                
-                // FIX: Actually add valid data to list!
+
                 data.add(values);
             }
-            
+
+            logger.info("CSV file read completed. Total valid rows: " + data.size() + ", Errors: " + errors.size());
+
         } catch (Exception e) {
-            errors.add(new Response(2, "Error reading CSV file: " + e.getMessage()));
+            String errorMsg = "Error reading CSV file: " + e.getMessage();
+            logger.severe(errorMsg);
+            errors.add(new Response<>(2, errorMsg));
         }
-        
-        return data;
+
+        return data.isEmpty() ? null : data;
     }
-    
-    // Method to get errors
+
     public static List<Response> getErrors() {
-        return new ArrayList<>(errors); // Return copy to prevent modification
+        return new ArrayList<>(errors);
     }
-    
-    // Method to check if there were errors
+
     public static boolean hasErrors() {
         return !errors.isEmpty();
     }

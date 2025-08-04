@@ -1,8 +1,27 @@
 package com.litmus7.empManagement.utils;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.Properties;
+
 public class DatabaseConfig {
-    public static final String URL = "jdbc:mysql://localhost:3306/java";
-    public static final String USERNAME = "root";
-    public static final String PASSWORD = "root";
-    public static final String DRIVER_CLASS = "com.mysql.cj.jdbc.Driver";
+	private static final String PROPERTIES_FILE = "src/db.properties";
+
+    public static Connection getConnection() throws SQLException {
+        Properties props = new Properties();
+        try (FileInputStream fis = new FileInputStream(PROPERTIES_FILE)) {
+            props.load(fis);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load database properties", e);
+        }
+
+        String url = props.getProperty("dbUrl");
+        String username = props.getProperty("username");
+        String password = props.getProperty("password");
+
+        return DriverManager.getConnection(url, username, password);
+    }
 }
