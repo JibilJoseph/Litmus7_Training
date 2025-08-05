@@ -1,19 +1,23 @@
 package com.litmus7.empManagement.utils;
 
 import com.litmus7.empManagement.model.Response;
+import com.litmus7.empManagement.constants.StatusCodes;
+import com.litmus7.empManagement.exception.EmployeeManagementException;
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-import java.util.logging.Level;
+
 
 public class CSVReader {
 
     private static List<Response> errors = new ArrayList<>();
     private static final Logger logger = AppLogger.getLogger();
 
-    public static List<String[]> readCSV(String filepath) {
+    public static List<String[]> readCSV(String filepath) throws EmployeeManagementException {
         List<String[]> data = new ArrayList<>();
         errors.clear();
 
@@ -51,10 +55,18 @@ public class CSVReader {
 
             logger.info("CSV file read completed. Total valid rows: " + data.size() + ", Errors: " + errors.size());
 
-        } catch (Exception e) {
+        } catch (FileNotFoundException e) {
+            String errorMsg = "CSV file not found: " + filepath;
+            logger.severe(errorMsg);
+            throw new EmployeeManagementException(errorMsg, e, StatusCodes.FILE_NOT_FOUND);
+        } catch (IOException e) {
             String errorMsg = "Error reading CSV file: " + e.getMessage();
             logger.severe(errorMsg);
-            errors.add(new Response<>(2, errorMsg));
+            throw new EmployeeManagementException(errorMsg, e, StatusCodes.CONNECTION_ERROR);
+        } catch (Exception e) {
+            String errorMsg = "Unexpected error reading CSV file: " + e.getMessage();
+            logger.severe(errorMsg);
+            throw new EmployeeManagementException(errorMsg, e, StatusCodes.FAILURE);
         }
 
         return data.isEmpty() ? null : data;

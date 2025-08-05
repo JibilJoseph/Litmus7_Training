@@ -4,7 +4,9 @@ import com.litmus7.empManagement.model.Employee;
 
 import com.litmus7.empManagement.utils.DatabaseConfig;
 import com.litmus7.empManagement.constants.SQLConstants;
+import com.litmus7.empManagement.constants.StatusCodes;
 import com.litmus7.empManagement.utils.AppLogger;
+import com.litmus7.empManagement.exception.EmployeeManagementException;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -16,7 +18,7 @@ public class EmployeeDAO {
 	private static final Logger logger = AppLogger.getLogger();
 	
 	 // DB Function : Save Employee
-	 public boolean saveEmployee(Employee employee) throws SQLIntegrityConstraintViolationException {
+	 public boolean saveEmployee(Employee employee) throws SQLIntegrityConstraintViolationException, EmployeeManagementException {
 		 
 	    	try (Connection conn = DatabaseConfig.getConnection();
 	    	        PreparedStatement stmt = conn.prepareStatement(SQLConstants.INSERT_EMPLOYEE)) 
@@ -40,12 +42,20 @@ public class EmployeeDAO {
 	    	        }
 	    	        return success;
 
-	    	 }
-	    	 catch (SQLException e) {
-	    	        logger.severe("Database error while saving employee ID " + employee.getEmpId() + ": " + e.getMessage());
-	    	        return false;
-	    	    }
-	    }
+	    	}
+	     	catch (SQLIntegrityConstraintViolationException e) 
+	    	{
+		       String errorMsg = "Duplicate employee ID: " + employee.getEmpId();
+		       logger.severe(errorMsg);
+		       throw new EmployeeManagementException(errorMsg, e, StatusCodes.DUPLICATE_ENTRY);
+	    	}
+	    	catch (SQLException e) {
+		       String errorMsg = "Database error while saving employee ID " + employee.getEmpId() + ": " + e.getMessage();
+		       logger.severe(errorMsg);
+		       throw new EmployeeManagementException(errorMsg, e, StatusCodes.DATABASE_ERROR);
+	    	}
+}
+	    
 	 
 	 	// Get All Employees
 	    
@@ -81,7 +91,7 @@ public class EmployeeDAO {
 	        return employees;
 	    }
 	    
-	    public boolean employeeExists(int empId) {
+	    public boolean employeeExists(int empId) throws EmployeeManagementException {
 	        try (Connection conn = DatabaseConfig.getConnection();
 	             PreparedStatement stmt = conn.prepareStatement(SQLConstants.CHECK_EMPLOYEE_EXISTS)) 
 	        {
@@ -95,9 +105,12 @@ public class EmployeeDAO {
 	            }
 	            
 	            return exists;
-	        } catch (SQLException e) {
-	            logger.severe("Database error while checking employee existence for ID " + empId + ": " + e.getMessage());
-	            return false;
+	        } 
+	        catch (SQLException e) 
+			{
+	            String errorMsg = "Database error while retrieving employees: " + e.getMessage();
+	            logger.severe(errorMsg);
+	            throw new EmployeeManagementException(errorMsg, e, StatusCodes.DATABASE_ERROR);
 	        }
 	    }
 }
