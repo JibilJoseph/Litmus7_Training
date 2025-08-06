@@ -63,11 +63,7 @@ public class CSVReader {
             String errorMsg = "Error reading CSV file: " + e.getMessage();
             logger.severe(errorMsg);
             throw new EmployeeManagementException(errorMsg, e, StatusCodes.CONNECTION_ERROR);
-        } catch (Exception e) {
-            String errorMsg = "Unexpected error reading CSV file: " + e.getMessage();
-            logger.severe(errorMsg);
-            throw new EmployeeManagementException(errorMsg, e, StatusCodes.FAILURE);
-        }
+        } 
 
         return data.isEmpty() ? null : data;
     }

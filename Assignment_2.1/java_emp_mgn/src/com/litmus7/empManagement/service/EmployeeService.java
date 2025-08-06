@@ -8,7 +8,6 @@ import com.litmus7.empManagement.utils.Validator;
 import com.litmus7.empManagement.utils.AppLogger;
 import com.litmus7.empManagement.exception.EmployeeManagementException;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -84,15 +83,10 @@ public class EmployeeService {
                     successCount++;
                     logger.fine("Successfully saved employee ID: " + employeeId);
 
-                } 
-                catch (NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     String errorMsg = "Row " + (i + 1) + ": Invalid number format - " + e.getMessage();
                     logger.warning(errorMsg);
-                    errorMessages.add(errorMsg);
-                } catch (Exception e) {
-                    String errorMsg = "Row " + (i + 1) + ": Error - " + e.getMessage();
-                    logger.severe(errorMsg);
-                    errorMessages.add(errorMsg);
+                    throw new EmployeeManagementException(errorMsg, e, StatusCodes.INVALID_FORMAT);
                 }
             }
 
@@ -100,15 +94,9 @@ public class EmployeeService {
 
             return new int[]{EmployeeData.size() - 1, successCount};
             
-        } 
-        // Catching Error in CSVReader Function
-        catch (EmployeeManagementException e) {
+        } catch (EmployeeManagementException e) {
             logger.severe("Employee management exception during import: " + e.getMessage());
             throw e;
-        } catch (Exception e) {
-            String errorMsg = "Unexpected error during employee import: " + e.getMessage();
-            logger.severe(errorMsg);
-            throw new EmployeeManagementException(errorMsg, e, StatusCodes.FAILURE);
         }
     }
 
@@ -116,15 +104,79 @@ public class EmployeeService {
     
     public List<Employee> getAllEmployees() throws EmployeeManagementException {
         logger.info("Fetching all employees from database");
-        try {
-            List<Employee> employees = employeeDAO.getAllEmployees();
-            logger.info("Successfully retrieved " + employees.size() + " employees");
-            return employees;
+        List<Employee> employees = employeeDAO.getAllEmployees();
+        logger.info("Successfully retrieved " + employees.size() + " employees");
+        return employees;
+    }
+    
+    
+ // Service 3: Get employee by ID
+    public Employee getEmployeeById(int empId) throws EmployeeManagementException {
+        logger.info("Fetching employee with ID: " + empId);
+        Employee employee = employeeDAO.getEmployeeById(empId);
+        if (employee != null) {
+            logger.info("Successfully retrieved employee with ID: " + empId);
+        } else {
+            logger.warning("No employee found with ID: " + empId);
         }
-        catch (Exception e) {
-            String errorMsg = "Unexpected error while fetching employees: " + e.getMessage();
-            logger.severe(errorMsg);
-            throw new EmployeeManagementException(errorMsg, e, StatusCodes.FAILURE);
+        return employee;
+    }
+ // Service 4: Delete employee by ID
+    
+    public boolean deleteEmployeeById(int employeeId) throws EmployeeManagementException
+    {
+    	logger.info("Deleting employee with ID : "+employeeId);
+    	boolean deleted=employeeDAO.deleteEmployeeById(employeeId);
+    	
+    	if (deleted) {
+            logger.info("Successfully deleted employee with ID: " + employeeId);
+        } else {
+            logger.warning("Failed to delete employee with ID: " + employeeId);
         }
+    	
+    	return deleted;
+    }
+ // Service 5: Add employee
+    
+    public boolean addEmployee(Employee employee) throws EmployeeManagementException
+    {
+    	logger.info("Adding new employee with ID: " + employee.getEmpId());
+        if (!Validator.validateEmployee(employee)) {
+            throw new EmployeeManagementException("Invalid employee data", StatusCodes.VALIDATION_ERROR);
+        }
+        if (employeeDAO.employeeExists(employee.getEmpId())) {
+            throw new EmployeeManagementException("Employee with ID " + employee.getEmpId() + " already exists.", StatusCodes.DUPLICATE_ENTRY);
+        }
+        
+        boolean added=employeeDAO.saveEmployee(employee);
+        if (added) {
+            logger.info("Successfully added employee with ID: " + employee.getEmpId());
+        } else {
+            logger.warning("Failed to add employee with ID: " + employee.getEmpId());
+        }
+        return added;
+    }
+  // Service 6 : update Employee
+    
+    public boolean updateEmployee(Employee employee) throws EmployeeManagementException
+    {
+    	logger.info("Updating employee with ID: " + employee.getEmpId());
+    	if(!Validator.validateEmployee(employee))
+    	{
+    		throw new EmployeeManagementException(	"invalid Employee",StatusCodes.VALIDATION_ERROR);
+    	}
+    	if (!employeeDAO.employeeExists(employee.getEmpId())) {
+            throw new EmployeeManagementException("Employee with ID " + employee.getEmpId() + " does not exist.", StatusCodes.FILE_NOT_FOUND);
+        }
+    	
+    	boolean updated=employeeDAO.updateEmployee(employee);
+    	if (updated) {
+            logger.info("Successfully updated employee with ID: " + employee.getEmpId());
+        } else {
+            logger.warning("Failed to update employee with ID: " + employee.getEmpId());
+        }
+        return updated;
+    	
+    	
     }
 }

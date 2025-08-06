@@ -3,7 +3,11 @@ package com.litmus7.empManagement.exception;
 
 public class EmployeeManagementException extends Exception {
     
-    private final int statusCode;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private final int statusCode;
     
 
     // Constructor with message and status code

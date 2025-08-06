@@ -8,7 +8,11 @@ import com.litmus7.empManagement.constants.StatusCodes;
 import com.litmus7.empManagement.utils.AppLogger;
 import com.litmus7.empManagement.exception.EmployeeManagementException;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -18,7 +22,7 @@ public class EmployeeDAO {
 	private static final Logger logger = AppLogger.getLogger();
 	
 	 // DB Function : Save Employee
-	 public boolean saveEmployee(Employee employee) throws SQLIntegrityConstraintViolationException, EmployeeManagementException {
+	 public boolean saveEmployee(Employee employee) throws EmployeeManagementException {
 		 
 	    	try (Connection conn = DatabaseConfig.getConnection();
 	    	        PreparedStatement stmt = conn.prepareStatement(SQLConstants.INSERT_EMPLOYEE)) 
@@ -42,24 +46,17 @@ public class EmployeeDAO {
 	    	        }
 	    	        return success;
 
-	    	}
-	     	catch (SQLIntegrityConstraintViolationException e) 
-	    	{
-		       String errorMsg = "Duplicate employee ID: " + employee.getEmpId();
-		       logger.severe(errorMsg);
-		       throw new EmployeeManagementException(errorMsg, e, StatusCodes.DUPLICATE_ENTRY);
-	    	}
-	    	catch (SQLException e) {
-		       String errorMsg = "Database error while saving employee ID " + employee.getEmpId() + ": " + e.getMessage();
-		       logger.severe(errorMsg);
-		       throw new EmployeeManagementException(errorMsg, e, StatusCodes.DATABASE_ERROR);
-	    	}
-}
-	    
+	    	 }
+    	 catch (SQLException e) {
+    	        String errorMsg = "Database error while saving employee ID " + employee.getEmpId() + ": " + e.getMessage();
+    	        logger.severe(errorMsg);
+    	        throw new EmployeeManagementException(errorMsg, e, StatusCodes.DATABASE_ERROR);
+    	    }
+	    }
 	 
 	 	// Get All Employees
 	    
-	    public List<Employee> getAllEmployees() 
+	    public List<Employee> getAllEmployees() throws EmployeeManagementException 
 	    {
 	        List<Employee> employees = new ArrayList<>();
 
@@ -85,7 +82,9 @@ public class EmployeeDAO {
 	            logger.info("Successfully retrieved " + employees.size() + " employees from database");
 	            
 	        } catch (SQLException e) {
-	            logger.severe("Database error while retrieving employees: " + e.getMessage());
+	            String errorMsg = "Database error while retrieving employees: " + e.getMessage();
+	            logger.severe(errorMsg);
+	            throw new EmployeeManagementException(errorMsg, e, StatusCodes.DATABASE_ERROR);
 	        }
 
 	        return employees;
@@ -105,12 +104,88 @@ public class EmployeeDAO {
 	            }
 	            
 	            return exists;
-	        } 
-	        catch (SQLException e) 
-			{
-	            String errorMsg = "Database error while retrieving employees: " + e.getMessage();
+	                } catch (SQLException e) {
+            String errorMsg = "Database error while checking employee existence for ID " + empId + ": " + e.getMessage();
+            logger.severe(errorMsg);
+            throw new EmployeeManagementException(errorMsg, e, StatusCodes.DATABASE_ERROR);
+        }
+	    }
+	    
+	    public Employee getEmployeeById(int employeeId) throws EmployeeManagementException
+	    {
+	    	Employee employee=null;
+	    	try(Connection conn=DatabaseConfig.getConnection();
+	    		PreparedStatement stmt=conn.prepareStatement(SQLConstants.SELECT_EMPLOYEE_BY_ID))
+	    	{
+	    		stmt.setInt(1, employeeId);
+	    		ResultSet rs=stmt.executeQuery();
+	    		if(rs.next())
+	    		{
+	    			employee=new Employee();
+	    			employee.setEmpId(rs.getInt("emp_id"));
+	    			employee.setFirstName(rs.getString("first_name"));
+	    			employee.setLastName(rs.getString("last_name"));
+	                employee.setEmail(rs.getString("email"));
+	                employee.setPhone(rs.getString("phone"));
+	                employee.setDepartment(rs.getString("department"));
+	                employee.setSalary(rs.getDouble("salary"));
+	                employee.setJoinDate(rs.getDate("join_date").toLocalDate());
+	    		}
+	    		
+	    		
+	    	}
+	    	catch (SQLException e) {
+	            String errorMsg = "Database error while retrieving employee with ID " + employeeId + ": " + e.getMessage();
 	            logger.severe(errorMsg);
 	            throw new EmployeeManagementException(errorMsg, e, StatusCodes.DATABASE_ERROR);
 	        }
+	        
+	    	return employee;
+	    }
+	    
+	    public boolean deleteEmployeeById(int employeeId) throws EmployeeManagementException
+	    {
+	    	try(Connection conn=DatabaseConfig.getConnection();
+	    		PreparedStatement stmt=conn.prepareStatement(SQLConstants.DELETE_EMPLOYEE_BY_ID))
+	    	{
+	    		stmt.setInt(1, employeeId);
+	    		int rowsAffected=stmt.executeUpdate();
+	    		return rowsAffected>0;
+	    	}
+	    	catch(SQLException e)
+	    	{
+	    		String errorMsg = "Database error while deleting employee with ID " + employeeId + ": " + e.getMessage();
+	    		logger.severe(errorMsg);
+	    		throw new EmployeeManagementException(errorMsg,e,StatusCodes.DATABASE_ERROR);
+	    	}
+	    	
+	    }
+	    
+	    // update Employee
+	    
+	    public boolean updateEmployee(Employee employee) throws EmployeeManagementException
+	    {
+	    	try(Connection conn=DatabaseConfig.getConnection();
+	    		PreparedStatement stmt=conn.prepareStatement(SQLConstants.UPDATE_EMPLOYEE))
+	    	{
+	    		stmt.setString(1, employee.getFirstName());
+	    		stmt.setString(2, employee.getLastName());
+	            stmt.setString(3, employee.getEmail());
+	            stmt.setString(4, employee.getPhone());
+	            stmt.setString(5, employee.getDepartment());
+	            stmt.setDouble(6, employee.getSalary());
+	            stmt.setDate(7, java.sql.Date.valueOf(employee.getJoinDate()));
+	            stmt.setInt(8, employee.getEmpId());
+	            
+	            int rowsAffected=stmt.executeUpdate();
+	            return rowsAffected>0;
+	    	}
+	    	catch (SQLException e) {
+	            String errorMsg = "Database error while updating employee with ID " + employee.getEmpId() + ": " + e.getMessage();
+	            logger.severe(errorMsg);
+	            throw new EmployeeManagementException(errorMsg, e, StatusCodes.DATABASE_ERROR);
+	        }
+	    	
+	    	
 	    }
 }

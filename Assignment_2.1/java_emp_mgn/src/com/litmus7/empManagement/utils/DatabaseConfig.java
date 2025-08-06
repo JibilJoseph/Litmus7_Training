@@ -9,15 +9,20 @@ import java.util.Properties;
 
 public class DatabaseConfig {
 	private static final String PROPERTIES_FILE = "src/db.properties";
-
-    public static Connection getConnection() throws SQLException {
-        Properties props = new Properties();
-        try (FileInputStream fis = new FileInputStream(PROPERTIES_FILE)) {
+	private static final Properties props = new Properties();
+	
+	// moving to static block
+	static {
+    	try (FileInputStream fis = new FileInputStream(PROPERTIES_FILE)) {
             props.load(fis);
         } catch (IOException e) {
             throw new RuntimeException("Failed to load database properties", e);
         }
+    }
 
+    public static Connection getConnection() throws SQLException {
+        
+       
         String url = props.getProperty("dbUrl");
         String username = props.getProperty("username");
         String password = props.getProperty("password");

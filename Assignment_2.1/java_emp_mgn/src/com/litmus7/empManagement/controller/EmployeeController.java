@@ -1,11 +1,11 @@
 package com.litmus7.empManagement.controller;
 
-import java.io.IOException;
 import java.util.List;
 
 import com.litmus7.empManagement.model.Response;
 import com.litmus7.empManagement.service.EmployeeService;
 import com.litmus7.empManagement.model.Employee;
+import com.litmus7.empManagement.constants.MessageConstants;
 import com.litmus7.empManagement.constants.StatusCodes;
 import com.litmus7.empManagement.exception.EmployeeManagementException;
 import com.litmus7.empManagement.utils.AppLogger;
@@ -33,12 +33,12 @@ public class EmployeeController {
     	if (filepath == null || filepath.trim().isEmpty()) 
     	{
     		logger.warning("Missing file path provided");
-    		return new Response<>(StatusCodes.FAILURE,"Missing File Path",null);
+    		return new Response<>(StatusCodes.FAILURE,MessageConstants.MISSING_FILE_PATH,null);
     	}
     	
     	if (!filepath.toLowerCase().endsWith(".csv")) {
     		logger.warning("Invalid file format provided: " + filepath + " (expected .csv)");
-	        return new Response<>(StatusCodes.FAILURE, "Given File is Not CSV", null);
+	        return new Response<>(StatusCodes.FAILURE, MessageConstants.INVALID_FILE_FORMAT, null);
 	    }
     	
     	try {
@@ -53,12 +53,12 @@ public class EmployeeController {
     	    if (insertedCount == 0) 
     	    {
     	    	logger.warning("No records were inserted into database");
-    	        return new Response<>(500, "No records were inserted.", null);
+    	    	return new Response<>(500, MessageConstants.NO_RECORDS_INSERTED, null);
     	    } 
     	    else if (insertedCount < total) 
     	    {
     	    	logger.warning("Partial insert completed: " + insertedCount + " of " + total + " records");
-    	        return new Response<>(StatusCodes.PARTIAL_SUCCESS, "Partial insert: " + insertedCount + " of " + total + " inserted.", insertedCount);
+    	    	return new Response<Integer>(StatusCodes.PARTIAL_SUCCESS, String.format(MessageConstants.PARTIAL_INSERT, insertedCount, total), insertedCount);
     	    } 
     	    else
     	    {
@@ -67,10 +67,10 @@ public class EmployeeController {
     	    }
     	} catch (EmployeeManagementException e) {
     		logger.severe("Employee management exception in writeDataToDB: " + e.getMessage());
-    		return new Response<>(e.getStatusCode(), "Error: " + e.getMessage(), null);
+    		return new Response<>(e.getStatusCode(), String.format(MessageConstants.ERROR_PREFIX, e.getMessage()), null);
     	} catch (Exception e) {
     		logger.severe("Unexpected error in writeDataToDB: " + e.getMessage());
-    		return new Response<>(StatusCodes.FAILURE, "Unexpected error occurred", null);
+    		return new Response<>(StatusCodes.FAILURE, MessageConstants.UNEXPECTED_ERROR, null);
     	}
     }
 
@@ -82,15 +82,111 @@ public class EmployeeController {
 		try {
 			List<Employee> employees = employeeService.getAllEmployees();
 			logger.info("Successfully fetched " + employees.size() + " employee records");
-			return new Response<>(StatusCodes.SUCCESS,"Employee Data Fetch Success",employees);
+			return new Response<>(StatusCodes.SUCCESS,MessageConstants.EMPLOYEE_DATA_FETCH_SUCCESS,employees);
 		} catch (EmployeeManagementException e) {
 			logger.severe("Employee management exception in getAllEmployees: " + e.getMessage());
-			return new Response<>(e.getStatusCode(),"Failed to Fetch Employee Data: " + e.getMessage());
+			return new Response<>(e.getStatusCode(),String.format(MessageConstants.FAILED_TO_FETCH_EMPLOYEE_DATA, e.getMessage()));
 		} catch (Exception e) {
 			logger.severe("Unexpected error in getAllEmployees: " + e.getMessage());
-			return new Response<>(StatusCodes.FAILURE,"Unexpected error occurred while fetching employee data");
+			return new Response<>(StatusCodes.FAILURE,MessageConstants.UNEXPECTED_ERROR_FETCHING_DATA);
 		}
 	}
+    
+    // controller function 3 : Get Employee by ID
+    
+    public Response<Employee> getEmployeeById(int employeeId)
+    {
+    	try {
+			Employee employee=employeeService.getEmployeeById(employeeId);
+			if (employee != null) {
+				logger.info("Successfully fetched employee record for ID: " + employeeId);
+				return new Response<>(StatusCodes.SUCCESS, "Employee found", employee);
+			} else {
+				logger.warning("No employee found with ID: " + employeeId);
+				return new Response<>(StatusCodes.FILE_NOT_FOUND, "Employee not found", null);
+			}
+		} catch (EmployeeManagementException e) {
+			logger.severe("Employee management exception in getEmployeeById: " + e.getMessage());
+			return new Response<>(e.getStatusCode(), String.format(MessageConstants.FAILED_TO_FETCH_EMPLOYEE_DATA, e.getMessage()));
+		} catch (Exception e) {
+			logger.severe("Unexpected error in getEmployeeById: " + e.getMessage());
+			return new Response<>(StatusCodes.FAILURE, MessageConstants.UNEXPECTED_ERROR_FETCHING_DATA);
+		}
+		
+    	
+    }
+    
+    // controller function 4 : Delete Employee by ID
+    
+    public Response<Boolean> deleteEmployeeById(int employeeId)
+    {
+    	try {
+			boolean deleted=employeeService.deleteEmployeeById(employeeId);
+			if (deleted) {
+				logger.info("Successfully deleted employee with ID: " + employeeId);
+				return new Response<>(StatusCodes.SUCCESS, MessageConstants.DELETE_SUCCESS, true);
+			} else {
+				logger.warning("Failed to delete employee with ID: " + employeeId);
+				return new Response<>(StatusCodes.FAILURE,MessageConstants.DELETE_FAILED, false);
+			}
+		} catch (EmployeeManagementException e) {
+			logger.severe("Employee management exception in deleteEmployeeById: " + e.getMessage());
+			return new Response<>(e.getStatusCode(), MessageConstants.ERROR_DELETION + e.getMessage(), false);
+		} catch (Exception e) {
+			logger.severe("Unexpected error in deleteEmployeeById: " + e.getMessage());
+			return new Response<>(StatusCodes.FAILURE,MessageConstants.UNEXPECTED_ERROR, false);
+		}
+    	
+    }
+    
+    // controller function 5 : Add Employee
+    
+    public Response<Boolean> addEmployee(Employee employee) 
+    {
+    	logger.info("Starting to add new employee with ID: " + employee.getEmpId());
+    	
+    	
+    	try {
+			boolean added = employeeService.addEmployee(employee);
+			if (added) {
+				logger.info("Successfully added employee with ID: " + employee.getEmpId());
+				return new Response<>(StatusCodes.SUCCESS, "Employee added successfully", true);
+			} else {
+				logger.warning("Failed to add employee with ID: " + employee.getEmpId());
+				return new Response<>(StatusCodes.FAILURE, "Failed to add employee", false);
+			}
+		} catch (EmployeeManagementException e) {
+			logger.severe("Employee management exception in addEmployee: " + e.getMessage());
+			return new Response<>(e.getStatusCode(), "Error adding employee: " + e.getMessage(), false);
+		} catch (Exception e) {
+			logger.severe("Unexpected error in addEmployee: " + e.getMessage());
+			return new Response<>(StatusCodes.FAILURE, "Unexpected error occurred while adding employee", false);
+		}
+    	
+    }
+    
+    // controller function 6 : Update Employee
+    
+    public Response<Boolean> updateEmployee(Employee employee)
+    {
+    	try {
+			boolean updated=employeeService.updateEmployee(employee);
+			if (updated) {
+				logger.info("Successfully updated employee with ID: " + employee.getEmpId());
+				return new Response<>(StatusCodes.SUCCESS, "Employee updated successfully", true);
+			} else {
+				logger.warning("Failed to update employee with ID: " + employee.getEmpId());
+				return new Response<>(StatusCodes.FAILURE, "Failed to update employee", false);
+			}
+		} catch (EmployeeManagementException e) {
+			logger.severe("Employee management exception in updateEmployee: " + e.getMessage());
+			return new Response<>(e.getStatusCode(), "Error updating employee: " + e.getMessage(), false);
+		} catch (Exception e) {
+			logger.severe("Unexpected error in updateEmployee: " + e.getMessage());
+			return new Response<>(StatusCodes.FAILURE, "Unexpected error occurred while updating employee", false);
+		}
+    	
+    }
 }
     
     
