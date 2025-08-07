@@ -187,6 +187,81 @@ public class EmployeeController {
 		}
     	
     }
+    
+    // controller function 7 : Add Employees in Batch
+    
+    public Response<int[]> addEmployeesInBatch(List<Employee> employeeList)
+    {
+    	logger.info("Starting to add " + employeeList.size() + " employees in batch.");
+    	
+    	try {
+    		
+			int[] result=employeeService.addEmployeesInBatch(employeeList);
+			int successCount=0;
+			for(int i:result)
+			{
+				if(i>=0)
+				{
+					successCount++;
+				}
+			}
+			
+			// Checking sucessCount
+			
+			if (successCount == employeeList.size()) {
+				logger.info("All employees added successfully in batch.");
+				return new Response<>(StatusCodes.SUCCESS, "All employees added successfully.", result);
+			} else {
+				logger.warning("Partial success in batch employee addition. " + successCount + " out of "
+						+ employeeList.size() + " added.");
+				return new Response<>(StatusCodes.PARTIAL_SUCCESS,
+						"Partially added employees. " + successCount + " out of " + employeeList.size() + " succeeded.",
+						result);
+			}
+			
+			
+		} catch (EmployeeManagementException e) {
+			logger.severe("Employee management exception in addEmployeesInBatch: " + e.getMessage());
+			return new Response<>(e.getStatusCode(), "Error adding employees in batch: " + e.getMessage(), null);
+		} catch (Exception e) {
+			logger.severe("Unexpected error in addEmployeesInBatch: " + e.getMessage());
+			return new Response<>(StatusCodes.FAILURE, "Unexpected error occurred while adding employees in batch",
+					null);
+		}
+    			
+    	
+    }
+    
+    // controller function 8 : transfer Employees to Department
+    
+    public Response<Boolean> transferEmployeesToDepartment(List<Integer> employeeIds,String newDepartment)
+    {
+    	logger.info("Starting to transfer " + employeeIds.size() + " employees to department " + newDepartment);
+    	try {
+			boolean sucess=employeeService.transferEmployeesToDepartment(employeeIds, newDepartment);
+			
+			if(sucess)
+			{
+				logger.info("Successfully transferred employees.");
+				return new Response<>(StatusCodes.SUCCESS,"Employees transfered successfully");
+			}
+			else
+			{
+				logger.warning("Failed to transfer employees.");
+	            return new Response<>(StatusCodes.FAILURE, "Failed to transfer employees.");
+			}
+		} catch (EmployeeManagementException e) {
+			logger.severe("Employee management exception in transferEmployeesToDepartment: " + e.getMessage());
+			return new Response<>(e.getStatusCode(),"error transfering employees : "+e.getMessage());
+		}
+    	catch(Exception e)
+    	{
+    		logger.severe("Unexpected error in transferEmployeesToDepartment: " + e.getMessage());
+            return new Response<>(StatusCodes.FAILURE, "Unexpected error occurred while transferring employees");
+    	}
+		
+    	
+    }
 }
     
     

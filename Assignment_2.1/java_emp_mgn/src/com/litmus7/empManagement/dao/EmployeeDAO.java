@@ -9,9 +9,9 @@ import com.litmus7.empManagement.utils.AppLogger;
 import com.litmus7.empManagement.exception.EmployeeManagementException;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -187,5 +187,98 @@ public class EmployeeDAO {
 	        }
 	    	
 	    	
+	    }
+	    
+	    // Add Employees in Batch
+	    public int[] addEmployeesInBatch(List<Employee> employeeList) throws EmployeeManagementException
+	    {
+	    	try(Connection conn=DatabaseConfig.getConnection();
+	    		PreparedStatement stmt=conn.prepareStatement(SQLConstants.INSERT_EMPLOYEE))
+	    	{
+	    		for(Employee employee : employeeList)
+	    		{
+	    			stmt.setInt(1, employee.getEmpId());
+	    			stmt.setString(2, employee.getFirstName());
+	                stmt.setString(3, employee.getLastName());
+	                stmt.setString(4, employee.getEmail());
+	                stmt.setString(5, employee.getPhone());
+	                stmt.setString(6, employee.getDepartment());
+	                stmt.setDouble(7, employee.getSalary());
+	                stmt.setDate(8, java.sql.Date.valueOf(employee.getJoinDate()));
+	                
+	                stmt.addBatch();
+	    		}
+	    		
+	    		int[] updateCounts=stmt.executeBatch();
+	    		int successCount=0;
+	    		for(int count : updateCounts)
+	    		{
+	    			if(count>=0)
+	    					successCount++;
+	    		}
+	    		
+	    		//adding to logger
+	    		logger.info("Successfully inserted " + successCount + " out of " + employeeList.size() + " employees in batch.");
+	            return updateCounts;
+	    	}
+	    	catch (SQLException e) {
+	            String errorMsg = "Database error during batch employee insert: " + e.getMessage();
+	            logger.severe(errorMsg);
+	            throw new EmployeeManagementException(errorMsg, e, StatusCodes.DATABASE_ERROR);
+	        }
+	    }
+	    
+	    // Transfer Employees To Department
+	    
+	    public boolean transferEmployeesToDepartment(List<Integer> employeeIds, String newDepartment) throws EmployeeManagementException 
+	    {
+	        Connection conn = null;
+	        try {
+	            conn = DatabaseConfig.getConnection();
+	            conn.setAutoCommit(false); 
+
+	            try (PreparedStatement stmt = conn.prepareStatement(SQLConstants.UPDATE_EMPLOYEE_DEPARTMENT)) 
+	            {
+	                for (Integer empId : employeeIds) 
+	                {
+	                    stmt.setString(1, newDepartment);
+	                    stmt.setInt(2, empId);
+	                    stmt.addBatch();
+	                }
+	                stmt.executeBatch();
+	            }
+
+	            conn.commit(); 
+	            logger.info("Successfully transferred " + employeeIds.size() + " employees to department " + newDepartment);
+	            return true;
+
+	        } 
+	        catch (SQLException e) 
+	        {
+	            if (conn != null) {
+	                try {
+	                    conn.rollback(); 
+	                    logger.warning("Transaction rolled back due to an error: " + e.getMessage());
+	                } catch (SQLException ex) {
+	                    logger.severe("Failed to rollback transaction: " + ex.getMessage());
+	                }
+	            }
+	            String errorMsg = "Database error during employee transfer: " + e.getMessage();
+	            logger.severe(errorMsg);
+	            throw new EmployeeManagementException(errorMsg, e, StatusCodes.DATABASE_ERROR);
+
+	        } 
+	        finally 
+	        {
+	            if (conn != null) 
+	            {
+	                try {
+	                    conn.setAutoCommit(true); 
+	                    conn.close();
+	                } catch (SQLException e) {
+	                    logger.severe("Failed to close connection: " + e.getMessage());
+	                }
+	            }
+	        }
 	    }
 }

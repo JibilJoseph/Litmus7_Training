@@ -179,4 +179,34 @@ public class EmployeeService {
     	
     	
     }
+    
+    // Service 7: Add employees in batch
+    
+    public int[] addEmployeesInBatch(List<Employee> employeeList) throws EmployeeManagementException
+    {
+    	logger.info("Adding " + employeeList.size() + " employees in batch.");
+    	
+    	List<Employee> validEmployees=new ArrayList<>();
+    	for(Employee employee : employeeList)
+    	{
+    		if(Validator.validateEmployee(employee) && !employeeDAO.employeeExists(employee.getEmpId()))
+    		{
+    			validEmployees.add(employee);
+    		}
+    		else {
+                logger.warning("Invalid or duplicate employee skipped: ID " + employee.getEmpId());
+            }
+    	}
+    	
+    	return employeeDAO.addEmployeesInBatch(validEmployees);
+    }
+    
+    // Service 7 : Transfer Employees to Department
+    
+    public boolean transferEmployeesToDepartment(List<Integer> employeeIds,String newDepartment) throws EmployeeManagementException
+    {
+        logger.info("Transferring " + employeeIds.size() + " employees to department " + newDepartment);
+        return employeeDAO.transferEmployeesToDepartment(employeeIds, newDepartment);
+    }
+    
 }
