@@ -1,0 +1,47 @@
+# Eclipse specific
+.metadata
+.classpath
+.project
+.settings
+target
+
+# Compiled Java classes
+bin/
+*.class
+
+# Log files
+*.log
+
+# Package files
+*.jar
+*.war
+*.ear
+
+# Other
+.DS_Store
+*.swp
+*~
+.lock
+.lock_info
+versions.json
+*.zip
+*.dat
+*.index
+assumedExternalFilesCache
+externalFilesCache
+externalLibsTimeStamps
+indexNamesMap.txt
+javaLikeNames.txt
+nonChainingJarsCache
+savedIndexNames.txt
+variablesAndContainers.dat
+dialog_settings.xml
+launchConfigurationHistory.xml
+workbench.xmi
+*.exec
+*.ser
+workspace.setup
+db.properties
+employees.csv
+*.xlsx
+hs_err_pid*

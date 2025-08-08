@@ -11,7 +11,7 @@ import com.litmus7.empManagement.exception.EmployeeManagementException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
+import org.apache.logging.log4j.Logger;
 
 public class EmployeeService {
     private final EmployeeDAO employeeDAO;
@@ -36,7 +36,7 @@ public class EmployeeService {
             EmployeeData = CSVReader.readCSV(filePath);
 
             if (EmployeeData == null) {
-                logger.severe("No valid data found in CSV file");
+                logger.error("No valid data found in CSV file");
                 return new int[]{0, 0};
             }
 
@@ -47,7 +47,7 @@ public class EmployeeService {
 
                 if (row.length != 8) {
                     String errorMsg = "Row " + (i + 1) + ": Invalid column count";
-                    logger.warning(errorMsg);
+                    logger.warn(errorMsg);
                     errorMessages.add(errorMsg);
                     continue;
                 }
@@ -67,13 +67,13 @@ public class EmployeeService {
                     
                     if (employeeDAO.employeeExists(employeeId)) {
                         String errorMsg = "Row " + (i + 1) + ": Duplicate entry for Employee ID " + employeeId;
-                        logger.warning(errorMsg);
+                        logger.warn(errorMsg);
                         errorMessages.add(errorMsg);
                         continue;
                     }
                     if (!Validator.validateEmployee(employee)) {
                         String errorMsg = "Row " + (i + 1) + ": Validation failed";
-                        logger.warning(errorMsg);
+                        logger.warn(errorMsg);
                         errorMessages.add(errorMsg);
                         continue;
                     }
@@ -81,11 +81,11 @@ public class EmployeeService {
                     
                     employeeDAO.saveEmployee(employee);
                     successCount++;
-                    logger.fine("Successfully saved employee ID: " + employeeId);
+                    logger.debug("Successfully saved employee ID: " + employeeId);
 
                 } catch (NumberFormatException e) {
                     String errorMsg = "Row " + (i + 1) + ": Invalid number format - " + e.getMessage();
-                    logger.warning(errorMsg);
+                    logger.warn(errorMsg);
                     throw new EmployeeManagementException(errorMsg, e, StatusCodes.INVALID_FORMAT);
                 }
             }
@@ -95,7 +95,7 @@ public class EmployeeService {
             return new int[]{EmployeeData.size() - 1, successCount};
             
         } catch (EmployeeManagementException e) {
-            logger.severe("Employee management exception during import: " + e.getMessage());
+            logger.error("Employee management exception during import: " + e.getMessage());
             throw e;
         }
     }
@@ -117,7 +117,7 @@ public class EmployeeService {
         if (employee != null) {
             logger.info("Successfully retrieved employee with ID: " + empId);
         } else {
-            logger.warning("No employee found with ID: " + empId);
+            logger.warn("No employee found with ID: " + empId);
         }
         return employee;
     }
@@ -131,7 +131,7 @@ public class EmployeeService {
     	if (deleted) {
             logger.info("Successfully deleted employee with ID: " + employeeId);
         } else {
-            logger.warning("Failed to delete employee with ID: " + employeeId);
+            logger.warn("Failed to delete employee with ID: " + employeeId);
         }
     	
     	return deleted;
@@ -152,7 +152,7 @@ public class EmployeeService {
         if (added) {
             logger.info("Successfully added employee with ID: " + employee.getEmpId());
         } else {
-            logger.warning("Failed to add employee with ID: " + employee.getEmpId());
+            logger.warn("Failed to add employee with ID: " + employee.getEmpId());
         }
         return added;
     }
@@ -173,7 +173,7 @@ public class EmployeeService {
     	if (updated) {
             logger.info("Successfully updated employee with ID: " + employee.getEmpId());
         } else {
-            logger.warning("Failed to update employee with ID: " + employee.getEmpId());
+            logger.warn("Failed to update employee with ID: " + employee.getEmpId());
         }
         return updated;
     	
@@ -194,7 +194,7 @@ public class EmployeeService {
     			validEmployees.add(employee);
     		}
     		else {
-                logger.warning("Invalid or duplicate employee skipped: ID " + employee.getEmpId());
+                logger.warn("Invalid or duplicate employee skipped: ID " + employee.getEmpId());
             }
     	}
     	

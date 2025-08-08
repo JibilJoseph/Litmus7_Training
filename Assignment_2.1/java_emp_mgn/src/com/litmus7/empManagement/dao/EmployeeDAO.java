@@ -15,7 +15,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
+import org.apache.logging.log4j.Logger;
 
 public class EmployeeDAO {
 
@@ -40,16 +40,16 @@ public class EmployeeDAO {
 	    	        int rowsInserted = stmt.executeUpdate();
 	    	        boolean success = rowsInserted > 0;
 	    	        if (success) {
-	    	            logger.fine("Successfully saved employee ID: " + employee.getEmpId());
+	    	            logger.debug("Successfully saved employee ID: " + employee.getEmpId());
 	    	        } else {
-	    	            logger.warning("Failed to save employee ID: " + employee.getEmpId());
+	    	            logger.warn("Failed to save employee ID: " + employee.getEmpId());
 	    	        }
 	    	        return success;
 
 	    	 }
     	 catch (SQLException e) {
     	        String errorMsg = "Database error while saving employee ID " + employee.getEmpId() + ": " + e.getMessage();
-    	        logger.severe(errorMsg);
+    	        logger.error(errorMsg);
     	        throw new EmployeeManagementException(errorMsg, e, StatusCodes.DATABASE_ERROR);
     	    }
 	    }
@@ -83,7 +83,7 @@ public class EmployeeDAO {
 	            
 	        } catch (SQLException e) {
 	            String errorMsg = "Database error while retrieving employees: " + e.getMessage();
-	            logger.severe(errorMsg);
+	            logger.error(errorMsg);
 	            throw new EmployeeManagementException(errorMsg, e, StatusCodes.DATABASE_ERROR);
 	        }
 
@@ -100,13 +100,13 @@ public class EmployeeDAO {
 	            boolean exists = rs.next();
 	            
 	            if (exists) {
-	                logger.fine("Employee ID " + empId + " already exists in database");
+	                logger.debug("Employee ID " + empId + " already exists in database");
 	            }
 	            
 	            return exists;
 	                } catch (SQLException e) {
             String errorMsg = "Database error while checking employee existence for ID " + empId + ": " + e.getMessage();
-            logger.severe(errorMsg);
+            logger.error(errorMsg);
             throw new EmployeeManagementException(errorMsg, e, StatusCodes.DATABASE_ERROR);
         }
 	    }
@@ -136,7 +136,7 @@ public class EmployeeDAO {
 	    	}
 	    	catch (SQLException e) {
 	            String errorMsg = "Database error while retrieving employee with ID " + employeeId + ": " + e.getMessage();
-	            logger.severe(errorMsg);
+	            logger.error(errorMsg);
 	            throw new EmployeeManagementException(errorMsg, e, StatusCodes.DATABASE_ERROR);
 	        }
 	        
@@ -155,7 +155,7 @@ public class EmployeeDAO {
 	    	catch(SQLException e)
 	    	{
 	    		String errorMsg = "Database error while deleting employee with ID " + employeeId + ": " + e.getMessage();
-	    		logger.severe(errorMsg);
+	    		logger.error(errorMsg);
 	    		throw new EmployeeManagementException(errorMsg,e,StatusCodes.DATABASE_ERROR);
 	    	}
 	    	
@@ -182,7 +182,7 @@ public class EmployeeDAO {
 	    	}
 	    	catch (SQLException e) {
 	            String errorMsg = "Database error while updating employee with ID " + employee.getEmpId() + ": " + e.getMessage();
-	            logger.severe(errorMsg);
+	            logger.error(errorMsg);
 	            throw new EmployeeManagementException(errorMsg, e, StatusCodes.DATABASE_ERROR);
 	        }
 	    	
@@ -223,7 +223,7 @@ public class EmployeeDAO {
 	    	}
 	    	catch (SQLException e) {
 	            String errorMsg = "Database error during batch employee insert: " + e.getMessage();
-	            logger.severe(errorMsg);
+	            logger.error(errorMsg);
 	            throw new EmployeeManagementException(errorMsg, e, StatusCodes.DATABASE_ERROR);
 	        }
 	    }
@@ -258,13 +258,13 @@ public class EmployeeDAO {
 	            if (conn != null) {
 	                try {
 	                    conn.rollback(); 
-	                    logger.warning("Transaction rolled back due to an error: " + e.getMessage());
+	                    logger.warn("Transaction rolled back due to an error: " + e.getMessage());
 	                } catch (SQLException ex) {
-	                    logger.severe("Failed to rollback transaction: " + ex.getMessage());
+	                    logger.error("Failed to rollback transaction: " + ex.getMessage());
 	                }
 	            }
 	            String errorMsg = "Database error during employee transfer: " + e.getMessage();
-	            logger.severe(errorMsg);
+	            logger.error(errorMsg);
 	            throw new EmployeeManagementException(errorMsg, e, StatusCodes.DATABASE_ERROR);
 
 	        } 
@@ -276,7 +276,7 @@ public class EmployeeDAO {
 	                    conn.setAutoCommit(true); 
 	                    conn.close();
 	                } catch (SQLException e) {
-	                    logger.severe("Failed to close connection: " + e.getMessage());
+	                    logger.error("Failed to close connection: " + e.getMessage());
 	                }
 	            }
 	        }

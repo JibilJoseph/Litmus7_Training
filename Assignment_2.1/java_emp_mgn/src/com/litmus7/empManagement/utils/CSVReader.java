@@ -9,7 +9,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
+import org.apache.logging.log4j.Logger;
 
 
 public class CSVReader {
@@ -36,7 +36,7 @@ public class CSVReader {
 
                 if (line.trim().isEmpty()) {
                     String errorMsg = "Empty line at line " + lineNumber;
-                    logger.warning(errorMsg);
+                    logger.warn(errorMsg);
                     errors.add(new Response<>(2, errorMsg));
                     continue;
                 }
@@ -45,7 +45,7 @@ public class CSVReader {
 
                 if (values.length != 8) {
                     String errorMsg = "Incomplete row at line " + lineNumber + ": expected 8 columns, got " + values.length;
-                    logger.warning(errorMsg);
+                    logger.warn(errorMsg);
                     errors.add(new Response<>(2, errorMsg));
                     continue;
                 }
@@ -57,11 +57,11 @@ public class CSVReader {
 
         } catch (FileNotFoundException e) {
             String errorMsg = "CSV file not found: " + filepath;
-            logger.severe(errorMsg);
+            logger.error(errorMsg);
             throw new EmployeeManagementException(errorMsg, e, StatusCodes.FILE_NOT_FOUND);
         } catch (IOException e) {
             String errorMsg = "Error reading CSV file: " + e.getMessage();
-            logger.severe(errorMsg);
+            logger.error(errorMsg);
             throw new EmployeeManagementException(errorMsg, e, StatusCodes.CONNECTION_ERROR);
         } 
 
