@@ -8,7 +8,7 @@ import com.litmus7.retail.dto.Product;
 
 public class ProductSorter {
 
-	public static void sort(List<Product> products, String sortBy) {
+	public void sort(List<Product> products, String sortBy) {
         Comparator<Product> comparator = null;
 
         switch (sortBy.toLowerCase()) {
@@ -20,6 +20,9 @@ public class ProductSorter {
                 break;
             case "name_asc":
                 comparator = Comparator.comparing(Product::getProductName);
+                break;
+            case "name_desc":
+                comparator = Comparator.comparing(Product::getProductName).reversed();
                 break;
             default:
                 // No sorting

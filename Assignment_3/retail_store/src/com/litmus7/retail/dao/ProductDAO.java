@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.litmus7.retail.dto.Product;
 import com.litmus7.retail.exception.RetailStoreException;
-import com.litmus7.retail.util.ProductSorter;
+
 
 public class ProductDAO {
 	
@@ -32,9 +32,6 @@ public class ProductDAO {
 		
 	}
 	
-	public List<Product> sortProducts(List<Product> products, String sortBy) throws RetailStoreException {
-        ProductSorter.sort(products, sortBy);
-        return products;
-    }
+
 
 }
