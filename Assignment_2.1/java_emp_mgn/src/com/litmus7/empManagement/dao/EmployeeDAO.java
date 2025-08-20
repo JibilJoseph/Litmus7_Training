@@ -3,8 +3,8 @@ package com.litmus7.empManagement.dao;
 import com.litmus7.empManagement.model.Employee;
 
 import com.litmus7.empManagement.utils.DatabaseConfig;
+import com.litmus7.empManagement.constants.ApplicationErrorCodes;
 import com.litmus7.empManagement.constants.SQLConstants;
-import com.litmus7.empManagement.constants.StatusCodes;
 import com.litmus7.empManagement.utils.AppLogger;
 import com.litmus7.empManagement.exception.EmployeeManagementException;
 
@@ -50,7 +50,7 @@ public class EmployeeDAO {
     	 catch (SQLException e) {
     	        String errorMsg = "Database error while saving employee ID " + employee.getEmpId() + ": " + e.getMessage();
     	        logger.error(errorMsg);
-    	        throw new EmployeeManagementException(errorMsg, e, StatusCodes.DATABASE_ERROR);
+    	        throw new EmployeeManagementException(errorMsg, e, ApplicationErrorCodes.SAVE_EMPLOYEE_FAILURE);
     	    }
 	    }
 	 
@@ -84,7 +84,7 @@ public class EmployeeDAO {
 	        } catch (SQLException e) {
 	            String errorMsg = "Database error while retrieving employees: " + e.getMessage();
 	            logger.error(errorMsg);
-	            throw new EmployeeManagementException(errorMsg, e, StatusCodes.DATABASE_ERROR);
+	            throw new EmployeeManagementException(errorMsg, e, ApplicationErrorCodes.GET_ALL_EMPLOYEES_FAILURE);
 	        }
 
 	        return employees;
@@ -107,7 +107,7 @@ public class EmployeeDAO {
 	                } catch (SQLException e) {
             String errorMsg = "Database error while checking employee existence for ID " + empId + ": " + e.getMessage();
             logger.error(errorMsg);
-            throw new EmployeeManagementException(errorMsg, e, StatusCodes.DATABASE_ERROR);
+            throw new EmployeeManagementException(errorMsg, e, ApplicationErrorCodes.EMPLOYEE_EXISTS_FAILURE);
         }
 	    }
 	    
@@ -137,7 +137,7 @@ public class EmployeeDAO {
 	    	catch (SQLException e) {
 	            String errorMsg = "Database error while retrieving employee with ID " + employeeId + ": " + e.getMessage();
 	            logger.error(errorMsg);
-	            throw new EmployeeManagementException(errorMsg, e, StatusCodes.DATABASE_ERROR);
+	            throw new EmployeeManagementException(errorMsg, e, ApplicationErrorCodes.GET_EMPLOYEE_BY_ID_FAILURE);
 	        }
 	        
 	    	return employee;
@@ -156,7 +156,7 @@ public class EmployeeDAO {
 	    	{
 	    		String errorMsg = "Database error while deleting employee with ID " + employeeId + ": " + e.getMessage();
 	    		logger.error(errorMsg);
-	    		throw new EmployeeManagementException(errorMsg,e,StatusCodes.DATABASE_ERROR);
+	    		throw new EmployeeManagementException(errorMsg,e,ApplicationErrorCodes.DELETE_EMPLOYEE_BY_ID_FAILURE);
 	    	}
 	    	
 	    }
@@ -183,7 +183,7 @@ public class EmployeeDAO {
 	    	catch (SQLException e) {
 	            String errorMsg = "Database error while updating employee with ID " + employee.getEmpId() + ": " + e.getMessage();
 	            logger.error(errorMsg);
-	            throw new EmployeeManagementException(errorMsg, e, StatusCodes.DATABASE_ERROR);
+	            throw new EmployeeManagementException(errorMsg, e, ApplicationErrorCodes.UPDATE_EMPLOYEE_FAILURE);
 	        }
 	    	
 	    	
@@ -224,7 +224,7 @@ public class EmployeeDAO {
 	    	catch (SQLException e) {
 	            String errorMsg = "Database error during batch employee insert: " + e.getMessage();
 	            logger.error(errorMsg);
-	            throw new EmployeeManagementException(errorMsg, e, StatusCodes.DATABASE_ERROR);
+	            throw new EmployeeManagementException(errorMsg, e, ApplicationErrorCodes.ADD_EMPLOYEES_IN_BATCH_FAILURE);
 	        }
 	    }
 	    
@@ -265,7 +265,7 @@ public class EmployeeDAO {
 	            }
 	            String errorMsg = "Database error during employee transfer: " + e.getMessage();
 	            logger.error(errorMsg);
-	            throw new EmployeeManagementException(errorMsg, e, StatusCodes.DATABASE_ERROR);
+	            throw new EmployeeManagementException(errorMsg, e, ApplicationErrorCodes.TRANSFER_EMPLOYEES_TO_DEPARTMENT_FAILURE);
 
 	        } 
 	        finally 

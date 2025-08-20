@@ -2,10 +2,7 @@ package com.litmus7.empManagement.exception;
 
 
 public class EmployeeManagementException extends Exception {
-    
-    /**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 	private final int statusCode;
     

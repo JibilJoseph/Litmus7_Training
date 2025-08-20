@@ -9,7 +9,7 @@ import com.litmus7.empManagement.constants.MessageConstants;
 import com.litmus7.empManagement.constants.StatusCodes;
 import com.litmus7.empManagement.exception.EmployeeManagementException;
 import com.litmus7.empManagement.utils.AppLogger;
-
+import com.litmus7.empManagement.utils.ErrorCodeManager;
 
 import org.apache.logging.log4j.Logger;
 
@@ -68,10 +68,10 @@ public class EmployeeController {
     	    }
     	} catch (EmployeeManagementException e) {
     		logger.error("Employee management exception in writeDataToDB: " + e.getMessage());
-    		return new Response<>(e.getStatusCode(), String.format(MessageConstants.ERROR_PREFIX, e.getMessage()), null);
+    		return new Response<>(e.getStatusCode(), ErrorCodeManager.getMessage(e.getStatusCode()), null);
     	} catch (Exception e) {
     		logger.error("Unexpected error in writeDataToDB: " + e.getMessage());
-    		return new Response<>(StatusCodes.FAILURE, MessageConstants.UNEXPECTED_ERROR, null);
+    		return new Response<>(701, ErrorCodeManager.getMessage(701), null);
     	}
     }
 
@@ -86,10 +86,10 @@ public class EmployeeController {
 			return new Response<>(StatusCodes.SUCCESS,MessageConstants.EMPLOYEE_DATA_FETCH_SUCCESS,employees);
 		} catch (EmployeeManagementException e) {
 			logger.error("Employee management exception in getAllEmployees: " + e.getMessage());
-			return new Response<>(e.getStatusCode(),String.format(MessageConstants.FAILED_TO_FETCH_EMPLOYEE_DATA, e.getMessage()));
+			return new Response<>(e.getStatusCode(),ErrorCodeManager.getMessage(e.getStatusCode()));
 		} catch (Exception e) {
 			logger.error("Unexpected error in getAllEmployees: " + e.getMessage());
-			return new Response<>(StatusCodes.FAILURE,MessageConstants.UNEXPECTED_ERROR_FETCHING_DATA);
+			return new Response<>(701,ErrorCodeManager.getMessage(701));
 		}
 	}
     
@@ -106,14 +106,13 @@ public class EmployeeController {
 				logger.warn("No employee found with ID: " + employeeId);
 				return new Response<>(StatusCodes.FILE_NOT_FOUND, "Employee not found", null);
 			}
-		} catch (EmployeeManagementException e) {
+		}  catch (EmployeeManagementException e) {
 			logger.error("Employee management exception in getEmployeeById: " + e.getMessage());
-			return new Response<>(e.getStatusCode(), String.format(MessageConstants.FAILED_TO_FETCH_EMPLOYEE_DATA, e.getMessage()));
+			return new Response<>(e.getStatusCode(), ErrorCodeManager.getMessage(e.getStatusCode()));
 		} catch (Exception e) {
 			logger.error("Unexpected error in getEmployeeById: " + e.getMessage());
-			return new Response<>(StatusCodes.FAILURE, MessageConstants.UNEXPECTED_ERROR_FETCHING_DATA);
+			return new Response<>(701, ErrorCodeManager.getMessage(701));
 		}
-		
     	
     }
     
@@ -132,10 +131,10 @@ public class EmployeeController {
 			}
 		} catch (EmployeeManagementException e) {
 			logger.error("Employee management exception in deleteEmployeeById: " + e.getMessage());
-			return new Response<>(e.getStatusCode(), MessageConstants.ERROR_DELETION + e.getMessage(), false);
+			return new Response<>(e.getStatusCode(), ErrorCodeManager.getMessage(e.getStatusCode()), false);
 		} catch (Exception e) {
 			logger.error("Unexpected error in deleteEmployeeById: " + e.getMessage());
-			return new Response<>(StatusCodes.FAILURE,MessageConstants.UNEXPECTED_ERROR, false);
+			return new Response<>(701,ErrorCodeManager.getMessage(701), false);
 		}
     	
     }
@@ -158,10 +157,10 @@ public class EmployeeController {
 			}
 		} catch (EmployeeManagementException e) {
 			logger.error("Employee management exception in addEmployee: " + e.getMessage());
-			return new Response<>(e.getStatusCode(), "Error adding employee: " + e.getMessage(), false);
+			return new Response<>(e.getStatusCode(), ErrorCodeManager.getMessage(e.getStatusCode()), false);
 		} catch (Exception e) {
 			logger.error("Unexpected error in addEmployee: " + e.getMessage());
-			return new Response<>(StatusCodes.FAILURE, "Unexpected error occurred while adding employee", false);
+			return new Response<>(701, ErrorCodeManager.getMessage(701), false);
 		}
     	
     }
@@ -181,10 +180,10 @@ public class EmployeeController {
 			}
 		} catch (EmployeeManagementException e) {
 			logger.error("Employee management exception in updateEmployee: " + e.getMessage());
-			return new Response<>(e.getStatusCode(), "Error updating employee: " + e.getMessage(), false);
+			return new Response<>(e.getStatusCode(), ErrorCodeManager.getMessage(e.getStatusCode()), false);
 		} catch (Exception e) {
 			logger.error("Unexpected error in updateEmployee: " + e.getMessage());
-			return new Response<>(StatusCodes.FAILURE, "Unexpected error occurred while updating employee", false);
+			return new Response<>(701, ErrorCodeManager.getMessage(701), false);
 		}
     	
     }
@@ -211,11 +210,11 @@ public class EmployeeController {
 			
 			if (successCount == employeeList.size()) {
 				logger.info("All employees added successfully in batch.");
-				return new Response<>(StatusCodes.SUCCESS, "All employees added successfully.", result);
+				return new Response<>(200, "All employees added successfully.", result);
 			} else {
 				logger.warn("Partial success in batch employee addition. " + successCount + " out of "
 						+ employeeList.size() + " added.");
-				return new Response<>(StatusCodes.PARTIAL_SUCCESS,
+				return new Response<>(206,
 						"Partially added employees. " + successCount + " out of " + employeeList.size() + " succeeded.",
 						result);
 			}
@@ -223,10 +222,10 @@ public class EmployeeController {
 			
 		} catch (EmployeeManagementException e) {
 			logger.error("Employee management exception in addEmployeesInBatch: " + e.getMessage());
-			return new Response<>(e.getStatusCode(), "Error adding employees in batch: " + e.getMessage(), null);
+			return new Response<>(e.getStatusCode(), ErrorCodeManager.getMessage(e.getStatusCode()), null);
 		} catch (Exception e) {
 			logger.error("Unexpected error in addEmployeesInBatch: " + e.getMessage());
-			return new Response<>(StatusCodes.FAILURE, "Unexpected error occurred while adding employees in batch",
+			return new Response<>(701, ErrorCodeManager.getMessage(701),
 					null);
 		}
     			
@@ -244,21 +243,21 @@ public class EmployeeController {
 			if(sucess)
 			{
 				logger.info("Successfully transferred employees.");
-				return new Response<>(StatusCodes.SUCCESS,"Employees transfered successfully");
+				return new Response<>(200,"Employees transfered successfully");
 			}
 			else
 			{
 				logger.warn("Failed to transfer employees.");
-	            return new Response<>(StatusCodes.FAILURE, "Failed to transfer employees.");
+	            return new Response<>(500, "Failed to transfer employees.");
 			}
 		} catch (EmployeeManagementException e) {
 			logger.error("Employee management exception in transferEmployeesToDepartment: " + e.getMessage());
-			return new Response<>(e.getStatusCode(),"error transfering employees : "+e.getMessage());
+			return new Response<>(e.getStatusCode(),ErrorCodeManager.getMessage(e.getStatusCode()));
 		}
     	catch(Exception e)
     	{
     		logger.error("Unexpected error in transferEmployeesToDepartment: " + e.getMessage());
-            return new Response<>(StatusCodes.FAILURE, "Unexpected error occurred while transferring employees");
+            return new Response<>(701, ErrorCodeManager.getMessage(701));
     	}
 		
     	
