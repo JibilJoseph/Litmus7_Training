@@ -1,0 +1,5 @@
+SKU,ProductName,Quantity,Price
+401,Valid Product,10,25.99
+402,Another Valid Product,15,39.99
+403,Invalid Negative Quantity,-5,29.99
+404,This Should Not Be Inserted,20,45.00

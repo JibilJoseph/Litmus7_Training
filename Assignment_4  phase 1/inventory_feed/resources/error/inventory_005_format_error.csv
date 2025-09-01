@@ -1,0 +1,4 @@
+SKU,ProductName,Quantity,Price
+501,Missing Price Field,25
+502,Complete Product,30,15.99
+503,Too Many Fields,40,25.99,Extra,Field
